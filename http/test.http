@@ -3,7 +3,7 @@ Accept: application/json
 
 ###
 
-GET http://localhost:8080/debug-api/test
+GET https://index-db.herokuapp.com/debug-api/test
 Accept: application/json
 
 ###
