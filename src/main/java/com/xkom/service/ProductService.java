@@ -60,8 +60,6 @@ public class ProductService {
            .toList()
            .flatMap(List::ofAll)
            .forEach(entity -> nameDbIdCache.put(entity.getProviderId(), entity.getId()));
-
-        System.out.println(); //FIXME REMOVE
     }
 
     private Tuple2<Long, PriceEntity> toEntry(Product product) {

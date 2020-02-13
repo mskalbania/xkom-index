@@ -34,7 +34,7 @@ public class DebugApi {
                            .url("asdas")
                            .providerId("asdasd")
                            .name("asdasd")
-                           .price(List.of(Price.create(BigDecimal.TEN, LocalDateTime.MAX))).build();
+                           .price(List.of(Price.create(BigDecimal.TEN, LocalDateTime.now()))).build();
         repository.save(ProductEntity.fromModel(p));
         return ResponseEntity.ok(List.of("HI"));
     }
