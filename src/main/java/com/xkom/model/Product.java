@@ -15,8 +15,6 @@ import java.util.Objects;
 @Builder
 public class Product {
 
-    //TODO CATEGORY
-
     private final String providerId;
     private final String url;
     private final String name;

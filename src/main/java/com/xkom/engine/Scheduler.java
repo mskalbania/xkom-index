@@ -27,7 +27,6 @@ public class Scheduler {
 
     public void schedule(Runnable task) {
         logger.info("Scheduling task at rate : {}", formatDuration(Duration.ofHours(scheduleRate).toMillis(), "ddD:HHh", false));
-        //A bit workaround - we want 5s delay but schedule rate in hours
-        scheduler.scheduleAtFixedRate(task, 5, HOURS.toSeconds(scheduleRate), SECONDS);
+        scheduler.scheduleAtFixedRate(task, scheduleRate, scheduleRate, HOURS);
     }
 }

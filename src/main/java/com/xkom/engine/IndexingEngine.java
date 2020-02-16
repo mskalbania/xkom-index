@@ -19,8 +19,6 @@ import static org.apache.commons.lang3.time.DurationFormatUtils.formatDuration;
 @Component
 public class IndexingEngine {
 
-    private static final String VERSION = "";
-
     private final Logger logger;
     private final DocumentParser documentParser;
     private final HttpClientWrapper client;
@@ -38,17 +36,6 @@ public class IndexingEngine {
         Option<Document> document = Try.of(() -> Jsoup.connect(documentParser.getStartingUrl()).get())
                                        .onFailure(Failures.connectionFailed(logger, documentParser.getBaseUrl()))
                                        .toOption();
-
-        //TODO FIGURE OUT VERSIONING
-//        if (document.isDefined()) {
-//            String obtainedVersion = documentParser.version(document.get());
-//            logger.info("Provider [{}] supported version is - {}, retrieved version is - {}",
-//                        documentParser.getBaseUrl(), VERSION, obtainedVersion);
-//            if (!VERSION.equalsIgnoreCase(obtainedVersion)) {
-//                logger.error("Versions does not match, shutting down");
-//                return;
-//            }
-//        }
 
         logger.info("Indexing started...");
         LocalTime start = LocalTime.now();

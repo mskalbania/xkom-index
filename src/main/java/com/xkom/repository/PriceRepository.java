@@ -23,6 +23,6 @@ public class PriceRepository {
     }
 
     private Function1<Tuple2<Long, PriceEntity>, Object[]> toObjectArray() {
-        return t -> new Object[]{t._2.getPrice().doubleValue(), t._2.getTimestamp().toString(), t._1};
+        return t -> new Object[]{t._2.getPrice().doubleValue(), t._2.getTimestamp(), t._1};
     }
 }

@@ -14,6 +14,7 @@ import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,13 +27,18 @@ public class ProductService {
     private final Logger logger;
 
     //Cache to avoid querying db for each element to check if already exists
-    //key - providerId, value - dbId
-    private final Map<String, Long> nameDbIdCache = Collections.synchronizedMap(new HashMap<>());
+    //Price is also stored to not save same value twice
+    //key - providerId, value - dbId,last price
+    private final Map<String, Tuple2<Long, BigDecimal>> nameDbIdCache = Collections.synchronizedMap(new HashMap<>());
 
     public ProductService(ProductRepository productRepository, PriceRepository priceRepository, Logger logger) {
         this.productRepository = productRepository;
         this.priceRepository = priceRepository;
         this.logger = logger;
+
+        productRepository.findByNameContaining("").forEach(p -> nameDbIdCache.put(
+                p.getProviderId(), Tuple.of(p.getId(), p.getPrices().get(p.getPrices().size() - 1).getPrice())
+        ));
     }
 
     public List<Product> getAllLike(String pattern) {
@@ -43,11 +49,12 @@ public class ProductService {
     }
 
     public void storeAll(Set<Product> products) {
-        List<Tuple2<Long, PriceEntity>> alreadyExistEntries = products.filter(product -> nameDbIdCache.containsKey(product.getProviderId()))
-                                                                      .toList()
-                                                                      .map(this::toEntry);
-        Try.run(() -> priceRepository.saveAll(alreadyExistEntries))
-           .onSuccess(it -> logger.info("Successfully stored EXISTING products - {}", alreadyExistEntries.length()))
+        List<Tuple2<Long, PriceEntity>> eligibleToUpdate = products.filter(this::isEligibleToUpdate)
+                                                                   .toList()
+                                                                   .peek(this::updateNewPrice)
+                                                                   .map(this::toEntry);
+        Try.run(() -> priceRepository.saveAll(eligibleToUpdate))
+           .onSuccess(it -> logger.info("Successfully stored new product prices - {}", eligibleToUpdate.length()))
            .onFailure(Failures.unableToStorePrice(logger));
 
         List<ProductEntity> newOnes = products.filter(product -> !nameDbIdCache.containsKey(product.getProviderId()))
@@ -56,14 +63,26 @@ public class ProductService {
 
         Try.of(() -> productRepository.saveAll(newOnes))
            .onFailure(Failures.unableToStoreProducts(logger))
-           .onSuccess(it -> logger.info("Successfully stored NEW products - {}", newOnes.length()))
+           .onSuccess(it -> logger.info("Successfully stored new products - {}", newOnes.length()))
            .toList()
            .flatMap(List::ofAll)
-           .forEach(entity -> nameDbIdCache.put(entity.getProviderId(), entity.getId()));
+           .forEach(entity -> nameDbIdCache.put(entity.getProviderId(), Tuple.of(entity.getId(),
+                                                                                 entity.getPrices().get(0).getPrice())));
+    }
+
+    private boolean isEligibleToUpdate(Product product) {
+        Tuple2<Long, BigDecimal> idLastPrice = nameDbIdCache.get(product.getProviderId());
+        return idLastPrice != null && !idLastPrice._2.equals(product.getPrice().head().getPrice());
+    }
+
+    private void updateNewPrice(Product product) {
+        nameDbIdCache.computeIfPresent(
+                product.getProviderId(), (k, t) -> Tuple.of(t._1, product.getPrice().get(0).getPrice())
+        );
     }
 
     private Tuple2<Long, PriceEntity> toEntry(Product product) {
-        Long id = nameDbIdCache.get(product.getProviderId());
+        Long id = nameDbIdCache.get(product.getProviderId())._1;
         return Tuple.of(id, PriceEntity.fromModel(product.getPrice().head()));
     }
 }

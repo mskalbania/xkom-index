@@ -1,0 +1,23 @@
+branch-defaults:
+  master:
+    environment: IndexDb-env
+environment-defaults:
+  IndexDb-env:
+    branch: null
+    repository: null
+global:
+  application_name: index-db
+  default_ec2_keyname: null
+  default_platform: arn:aws:elasticbeanstalk:eu-central-1::platform/Java 8 running
+    on 64bit Amazon Linux/2.10.2
+  default_region: eu-central-1
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: null
+  sc: git
+  workspace_type: Application
+
+deploy:
+  artifact: target/xkom-eb.jar
