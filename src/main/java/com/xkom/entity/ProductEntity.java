@@ -29,6 +29,7 @@ public class ProductEntity {
 
     @OneToMany(cascade = {ALL}, fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id")
+    @OrderBy("timestamp ASC")
     private List<PriceEntity> prices = new ArrayList<>();
 
     public static ProductEntity fromModel(Product product) {
