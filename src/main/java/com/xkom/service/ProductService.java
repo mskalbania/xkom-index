@@ -72,7 +72,14 @@ public class ProductService {
 
     private boolean isEligibleToUpdate(Product product) {
         Tuple2<Long, BigDecimal> idLastPrice = nameDbIdCache.get(product.getProviderId());
-        return idLastPrice != null && !idLastPrice._2.equals(product.getPrice().head().getPrice());
+        if (idLastPrice != null) {
+            BigDecimal lastCache = idLastPrice._2;
+            BigDecimal newExtracted = product.getPrice().head().getPrice();
+            boolean isEligible = !lastCache.equals(newExtracted);
+            logger.info("ELIGIBLE ITEM FOUND TO UPDATE CACHE -> [{}], EXTRACTED -> [{}]", lastCache, newExtracted);
+            return isEligible;
+        }
+        return false;
     }
 
     private void updateNewPrice(Product product) {
