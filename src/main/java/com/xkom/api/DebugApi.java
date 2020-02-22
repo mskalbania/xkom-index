@@ -42,11 +42,12 @@ public class DebugApi {
     @GetMapping("/test")
     public ResponseEntity<List<String>> test() {
         Product p = Product.builder()
-                           .url("asdas")
+                           .url("https://www.x-kom.pl/p/415823-karta-graficzna-amd-amd-radeon-pro-wx-5100-8gb-gddr5.html")
                            .providerId("asdasd")
                            .name("asdasd")
                            .price(List.of(Price.create(BigDecimal.TEN, LocalDateTime.now()))).build();
         ProductEntity saved = productRepository.save(ProductEntity.fromModel(p));
+        productRepository.save(ProductEntity.fromModel(p));
         PriceEntity pe = new PriceEntity();
         pe.setPrice(BigDecimal.ONE);
         pe.setTimestamp(LocalDateTime.now().plus(1, ChronoUnit.HOURS));

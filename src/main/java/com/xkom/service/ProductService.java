@@ -12,6 +12,9 @@ import io.vavr.collection.List;
 import io.vavr.collection.Set;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -36,13 +39,13 @@ public class ProductService {
         this.priceRepository = priceRepository;
         this.logger = logger;
 
-        productRepository.findByNameContaining("").forEach(p -> nameDbIdCache.put(
+        productRepository.findAll().forEach(p -> nameDbIdCache.put(
                 p.getProviderId(), Tuple.of(p.getId(), p.getPrices().get(p.getPrices().size() - 1).getPrice())
         ));
     }
 
-    public List<Product> getAllLike(String pattern) {
-        return Try.of(() -> productRepository.findByNameContaining(pattern))
+    public List<Product> getAllLike(String pattern, int page, int amount) {
+        return Try.of(() -> productRepository.findByNameContaining(pattern, PageRequest.of(page, amount)))
                   .toList()
                   .flatMap(List::ofAll)
                   .map(Product::fromEntity);

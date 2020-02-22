@@ -20,9 +20,14 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping("all") //TODO MOVE TO API MODEL
-    ResponseEntity<List<Product>> getAllProducts(@RequestParam(value = "like", required = false) String like) {
+    @GetMapping("all")
+    ResponseEntity<?> getAllProducts(@RequestParam(value = "like", required = false) String like,
+                                     @RequestParam(value = "page", defaultValue = "1") int page,
+                                     @RequestParam(value = "amount", defaultValue = "40") int amount) {
+        if(page - 1 < 0 || amount < 0) {
+          return ResponseEntity.badRequest().body("Page size and amount need to be > 0");
+        }
         String pattern = Option.of(like).getOrElse("");
-        return ResponseEntity.ok(productService.getAllLike(pattern));
+        return ResponseEntity.ok(productService.getAllLike(pattern, page -1, amount));
     }
 }
