@@ -1,7 +1,9 @@
 package com.xkom.entity;
 
 import com.xkom.model.Product;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -12,6 +14,8 @@ import static javax.persistence.CascadeType.ALL;
 @Entity
 @Table(name = "PRODUCT")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductEntity {
 
     @Id

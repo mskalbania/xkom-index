@@ -58,14 +58,19 @@ public class DebugApi {
     }
 
     @GetMapping("/save/p")
-    public String saveProduct(@RequestParam(value = "price") String price) {
+    public String saveProduct(@RequestParam(value = "price") String price,@RequestParam(value = "id") String id) {
         Product p = Product.builder()
                                .url("url")
-                               .providerId("providerId")
+                               .providerId(id)
                                .name("name")
                                .price(List.of(Price.create(BigDecimal.valueOf(Long.parseLong(price)), LocalDateTime.now()))).build();
         productService.storeAll(HashSet.of(p));
         return "HI";
+    }
+
+    @GetMapping("cache")
+    public String getCache() {
+        return productService.nameDbIdCache.toString();
     }
 
     @GetMapping("/reindex")

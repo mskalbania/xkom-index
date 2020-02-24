@@ -12,9 +12,7 @@ import io.vavr.collection.List;
 import io.vavr.collection.Set;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -32,7 +30,7 @@ public class ProductService {
     //Cache to avoid querying db for each element to check if already exists
     //Price is also stored to not save same value twice
     //key - providerId, value - dbId,last price
-    private final Map<String, Tuple2<Long, BigDecimal>> nameDbIdCache = Collections.synchronizedMap(new HashMap<>());
+    public final Map<String, Tuple2<Long, BigDecimal>> nameDbIdCache = Collections.synchronizedMap(new HashMap<>());
 
     public ProductService(ProductRepository productRepository, PriceRepository priceRepository, Logger logger) {
         this.productRepository = productRepository;
@@ -75,12 +73,17 @@ public class ProductService {
 
     private boolean isEligibleToUpdate(Product product) {
         Tuple2<Long, BigDecimal> idLastPrice = nameDbIdCache.get(product.getProviderId());
+
         if (idLastPrice != null) {
-            BigDecimal lastCache = idLastPrice._2;
-            BigDecimal newExtracted = product.getPrice().head().getPrice();
-            boolean isEligible = !lastCache.equals(newExtracted);
-            logger.info("ELIGIBLE ITEM FOUND TO UPDATE CACHE -> [{}], EXTRACTED -> [{}]", lastCache, newExtracted);
-            return isEligible;
+            BigDecimal lastPrice = idLastPrice._2;
+            BigDecimal newOne = product.getPrice().last().getPrice();
+            //Equals implementation is kind of bugged
+            //67.00.equals(67) returns false
+            boolean eligible = lastPrice.compareTo(newOne) != 0;
+            if (eligible) {
+                logger.info("ELIGIBLE ITEM TO FOUND -> PRODUCT: {} CACHE RECORD: {}", product, idLastPrice);
+            }
+            return eligible;
         }
         return false;
     }
