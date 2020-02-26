@@ -18,35 +18,42 @@ $(document).ready(function () {
                         list.empty();
                         $.each(data, function (idx, product) {
                                 list.append(
-                                   `<li class="list-group-item">
+                                    `<li class="list-group-item">
                                     Id: ${product.providerId}<br>   
                                     Name: ${product.name}<br>
                                     Url: <a href="${product.url}">${product.url}</a><br>
                                     Price change:<br>
-                                    ${table(product.price)}
+                                    <canvas id="${idx}" width="400" height="50"></canvas>
                                     </li>`
                                 )
                             }
-                        )
+                        );
+                        renderCharts(data)
                     })
             }
         }
     );
 
-    function table(price) {
-        return `<table class="table"> 
-                  <thead>
-                    <tr>
-                      <th scope="col">Date</th>
-                      <th scope="col">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${price.map(p => `<tr>
-                                        <td>${p.timeStamp}</td>
-                                        <td>${p.price}</td>
-                                        </tr>`).join("")}
-                  </tbody>
-                </table>`
+    function renderCharts(data) {
+        $.each(data, function (idx, product) {
+            let ctx = $(`#${idx}`);
+            let myLineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Price change over days',
+                        data: product.price.map(it => it.price),
+                    }],
+                    labels: product.price.map(it => it.timeStamp)
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            stacked: true
+                        }]
+                    }
+                }
+            })
+        });
     }
 });
