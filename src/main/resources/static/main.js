@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    const ENDPOINT = "/api/v1/products/all"
+    const ENDPOINT = "/api/v1/products/all";
 
     $("#input").keyup(function (event) {
             let searchQuery = event.target.value;
@@ -9,7 +9,7 @@ $(document).ready(function () {
                     ENDPOINT,
                     {
                         page: 1,
-                        amount: 50, //INTRODUCE PAGINATION
+                        amount: 25,
                         like: searchQuery
                     },
                     function (data) {
@@ -18,7 +18,7 @@ $(document).ready(function () {
                         list.empty();
                         $.each(data, function (idx, product) {
                                 list.append(
-                                    `<li class="list-group-item">
+                                   `<li class="list-group-item">
                                     Id: ${product.providerId}<br>   
                                     Name: ${product.name}<br>
                                     Url: <a href="${product.url}">${product.url}</a><br>
@@ -37,17 +37,15 @@ $(document).ready(function () {
         return `<table class="table"> 
                   <thead>
                     <tr>
-                      <th scope="col">TimeStamp</th>
+                      <th scope="col">Date</th>
                       <th scope="col">Price</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${price.map(p => `<tr>
-                                                <td>${p.timeStamp}</td>
-                                                <td>${p.price}</td>
-                                               </tr>`)
-                           .join("")
-                     }
+                                        <td>${p.timeStamp}</td>
+                                        <td>${p.price}</td>
+                                        </tr>`).join("")}
                   </tbody>
                 </table>`
     }
